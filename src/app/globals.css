@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root { --background: #080a0e; --foreground: #d9dee7; }
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: Arial, Helvetica, sans-serif; }
+button { cursor: pointer; }
+button:focus-visible { outline: 1px solid #3b82f6; outline-offset: -1px; }
+.thin-scrollbar { scrollbar-width: thin; scrollbar-color: #2c3340 transparent; }
+
+/*
+ * Keep the terminal dense without making supporting information illegible.
+ * A number of data-heavy components intentionally use exact pixel utilities;
+ * these floors bring them up to a comfortable desktop reading size while
+ * leaving the chart labels and responsive layout behavior intact.
+ */
+@media (min-width: 1024px) {
+  .text-\[7px\] { font-size: 10px; }
+  .text-\[8px\] { font-size: 10px; }
+  .text-\[9px\] { font-size: 11px; }
+  .text-\[10px\] { font-size: 12px; }
+  .text-\[11px\] { font-size: 13px; }
+  .text-xs { font-size: 13px; }
+}

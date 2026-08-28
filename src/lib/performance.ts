@@ -1,0 +1,2 @@
+export type PerformanceMetricName = "App shell" | "Quote fetch" | "Candle fetch" | "Chart render" | "Structure analysis" | "Pattern analysis" | "AI analysis" | "News fetch";
+export function reportPerformanceMetric(name: PerformanceMetricName, durationMs: number) { if (typeof window === "undefined" || process.env.NODE_ENV !== "development") return; window.dispatchEvent(new CustomEvent("ai-trading-performance", { detail: { name, durationMs: Math.round(durationMs) } })); }

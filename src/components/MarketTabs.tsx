@@ -1,0 +1,3 @@
+import { marketCategories, type MarketCategory } from "@/lib/market-data";
+export type { MarketCategory } from "@/lib/market-data";
+export function MarketTabs({ active, onChange }: { active: MarketCategory; onChange: (category: MarketCategory) => void }) { return <nav className="flex h-9 shrink-0 items-end overflow-x-auto border-b border-[#20242d] bg-[#0a0d12] md:pl-12">{marketCategories.map((category) => <button key={category} onClick={() => onChange(category)} className={`h-9 shrink-0 border-b-2 px-5 text-[11px] font-semibold tracking-wide ${active === category ? "border-blue-500 bg-[#10151d] text-blue-400" : "border-transparent text-[#747c8b] hover:text-[#c6ccd5]"}`}>{category}</button>)}</nav>; }

@@ -1,0 +1,25 @@
+import type { PatternName } from "./types";
+
+export const explanations: Record<PatternName, string> = {
+  "Bullish Engulfing": "Buyers completely covered the previous bearish candle body, showing a strong shift toward buying pressure.",
+  "Bearish Engulfing": "Sellers completely covered the previous bullish candle body, showing a strong shift toward selling pressure.",
+  Hammer: "Sellers pushed price lower, but buyers recovered most of the move before the candle closed.",
+  "Inverted Hammer": "Buyers tested higher prices after a decline, though follow-through is still needed.",
+  "Morning Star": "A bearish move stalled in indecision and was followed by a strong bullish recovery.",
+  "Three White Soldiers": "Three sustained bullish candles show persistent buying pressure.",
+  "Bullish Marubozu": "Buyers controlled almost the entire candle with very little rejection.",
+  "Shooting Star": "Buyers pushed higher, but sellers rejected the move and forced price back down.",
+  "Hanging Man": "A deep selloff was recovered, but the long lower wick warns that support may be weakening after an advance.",
+  "Evening Star": "A bullish move stalled in indecision and was followed by a strong bearish reversal.",
+  "Three Black Crows": "Three sustained bearish candles show persistent selling pressure.",
+  "Bearish Marubozu": "Sellers controlled almost the entire candle with very little rejection.",
+  Doji: "Open and close are very close. Buyers and sellers are balanced and direction is unclear.",
+  "Spinning Top": "A small body with wicks on both sides shows hesitation and weak directional control.",
+  "Long-Legged Doji": "Strong movement in both directions ended near the open, showing pronounced uncertainty.",
+  "Inside Bar": "Price contracted inside the previous range and is consolidating before a possible expansion.",
+  "Outside Bar": "Price expanded beyond both sides of the prior range, showing a sharp volatility increase.",
+  "Rising Three Methods": "A controlled pullback remained inside a bullish impulse before buyers resumed control.",
+  "Falling Three Methods": "A controlled bounce remained inside a bearish impulse before sellers resumed control.",
+  "Long Lower Wick": "Lower prices were rejected as buyers pushed the close away from the candle low.",
+  "Long Upper Wick": "Higher prices were rejected as sellers pushed the close away from the candle high.",
+};
