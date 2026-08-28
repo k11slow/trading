@@ -72,7 +72,16 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, task: (item: 
 let cache: { expiresAt: number; result: MarketScanResult } | null = null;
 export async function scanAllMarkets(refresh = false): Promise<MarketScanResult> {
   if (!refresh && cache && cache.expiresAt > Date.now()) return cache.result;
-  const assets = allAssets.filter((asset) => asset.dataStatus !== "UNAVAILABLE");
+  const availableAssets = allAssets.filter((asset) => asset.dataStatus !== "UNAVAILABLE");
+  // Twelve Data's entry plan cannot sustain quote + 15M + 1H + 4H bursts for
+  // every Forex symbol. Scan one representative pair per cycle and preserve
+  // the remaining request budget for the active chart and watchlist.
+  const forexAssets = availableAssets.filter((asset) => asset.category === "Forex");
+  const assets = [
+    ...availableAssets.filter((asset) => asset.category !== "Forex"),
+    ...forexAssets.slice(0, 1),
+  ];
+  const quotaDeferred = Math.max(0, forexAssets.length - 1);
   const settled = await mapWithConcurrency(assets, 5, analyzeAsset);
   const candidates = settled
     .flatMap((result) => result.status === "fulfilled" ? [result.value] : [])
@@ -104,7 +113,7 @@ export async function scanAllMarkets(refresh = false): Promise<MarketScanResult>
       }
     } catch { /* Deterministic ranking remains available. */ }
   }
-  const result: MarketScanResult = { candidates, preferredSymbol, rationale, source, model, scanned: candidates.length, unavailable: settled.length - candidates.length, generatedAt: Date.now() };
+  const result: MarketScanResult = { candidates, preferredSymbol, rationale, source, model, scanned: candidates.length, unavailable: settled.length - candidates.length + quotaDeferred, generatedAt: Date.now() };
   cache = { expiresAt: Date.now() + 60_000, result };
   return result;
 }
