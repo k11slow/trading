@@ -4,7 +4,10 @@ import { marketCatalog } from "../../market-data";
 
 // Binance recommends its market-data-only host for public quotes and candles.
 // The main api.binance.com host can return HTTP 451 from some cloud regions.
-const REST_URL = process.env.BINANCE_REST_URL ?? "https://data-api.binance.vision";
+const configuredRestUrl = process.env.BINANCE_REST_URL?.replace(/\/$/, "");
+const REST_URL = !configuredRestUrl || configuredRestUrl === "https://api.binance.com"
+  ? "https://data-api.binance.vision"
+  : configuredRestUrl;
 const intervals: Record<Timeframe, string> = { "15m": "15m", "1H": "1h", "4H": "4h", "1D": "1d" };
 const revalidate: Record<Timeframe, number> = { "15m": 30, "1H": 60, "4H": 300, "1D": 900 };
 const pair = (symbol: string) => symbol.replace("/", "").toUpperCase();

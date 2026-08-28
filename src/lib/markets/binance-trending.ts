@@ -10,7 +10,10 @@ type Ticker = {
   weightedAvgPrice: string;
   count: number;
 };
-const REST = process.env.BINANCE_REST_URL ?? "https://data-api.binance.vision";
+const configuredRestUrl = process.env.BINANCE_REST_URL?.replace(/\/$/, "");
+const REST = !configuredRestUrl || configuredRestUrl === "https://api.binance.com"
+  ? "https://data-api.binance.vision"
+  : configuredRestUrl;
 let tickerCache: { expiresAt: number; rows: Ticker[] } | null = null;
 const nameFor = (symbol: string) => `${symbol.replace(/USDT$/, "")} / Tether`;
 const normalize = (value: number, min: number, max: number) =>
