@@ -70,8 +70,9 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, task: (item: 
 }
 
 let cache: { expiresAt: number; result: MarketScanResult } | null = null;
-export async function scanAllMarkets(refresh = false): Promise<MarketScanResult> {
-  if (!refresh && cache && cache.expiresAt > Date.now()) return cache.result;
+let inFlight: Promise<MarketScanResult> | null = null;
+
+async function performMarketScan(): Promise<MarketScanResult> {
   const availableAssets = allAssets.filter((asset) => asset.dataStatus !== "UNAVAILABLE");
   // Twelve Data's entry plan cannot sustain quote + 15M + 1H + 4H bursts for
   // every Forex symbol. Scan one representative pair per cycle and preserve
@@ -116,4 +117,15 @@ export async function scanAllMarkets(refresh = false): Promise<MarketScanResult>
   const result: MarketScanResult = { candidates, preferredSymbol, rationale, source, model, scanned: candidates.length, unavailable: settled.length - candidates.length + quotaDeferred, generatedAt: Date.now() };
   cache = { expiresAt: Date.now() + 60_000, result };
   return result;
+}
+
+export async function scanAllMarkets(refresh = false): Promise<MarketScanResult> {
+  if (!refresh && cache && cache.expiresAt > Date.now()) return cache.result;
+  if (inFlight) return inFlight;
+  inFlight = performMarketScan();
+  try {
+    return await inFlight;
+  } finally {
+    inFlight = null;
+  }
 }
