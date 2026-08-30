@@ -30,6 +30,7 @@ import { PerformanceDebug } from "@/components/PerformanceDebug";
 import { PanelErrorBoundary } from "@/components/PanelErrorBoundary";
 import { BuyAlertSettingsPanel, BuyAlertToast } from "@/components/BuyAlertUI";
 import { useBuyAlerts } from "@/hooks/use-buy-alerts";
+import { SimpleTradingView } from "@/components/SimpleTradingView";
 
 type Workspace = {
   version: number;
@@ -65,6 +66,7 @@ export default function Home() {
   const [analysisSymbol, setAnalysisSymbol] = useState("");
   const [newsSymbol, setNewsSymbol] = useState("");
   const [buyAlertSettingsOpen, setBuyAlertSettingsOpen] = useState(false);
+  const [simpleMode, setSimpleMode] = useState(true);
   const skipFirstPersist = useRef(true);
   const asset =
     dynamicAsset?.symbol === workspace.symbol
@@ -100,6 +102,12 @@ export default function Home() {
     workspace.explanationMode,
   );
   const buyAlerts = useBuyAlerts(setupFacts);
+  useEffect(() => {
+    const saved = window.localStorage.getItem("ai-trading-simple-mode");
+    if (saved !== "false") return;
+    const frame = window.requestAnimationFrame(() => setSimpleMode(false));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
   useEffect(() => {
     const analysisTimer = window.setTimeout(
       () => setAnalysisSymbol(asset.symbol),
@@ -224,7 +232,7 @@ export default function Home() {
   );
 
   return (
-    <main className="flex h-dvh min-h-[680px] flex-col overflow-hidden bg-[#080a0e] text-[#d9dee7]">
+    <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[#080a0e] text-[#d9dee7]">
       <PerformanceDebug />
       <BuyAlertSettingsPanel alerts={buyAlerts} open={buyAlertSettingsOpen} onClose={() => setBuyAlertSettingsOpen(false)} />
       <BuyAlertToast alerts={buyAlerts} onView={() => setSidebarView("Watchlist")} />
@@ -242,7 +250,8 @@ export default function Home() {
         onOpenBuyAlerts={() => setBuyAlertSettingsOpen(true)}
       />
       <MarketTabs active={workspace.category} onChange={changeCategory} />
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-12 lg:flex-row lg:overflow-hidden lg:pb-0 thin-scrollbar">
+        {simpleMode ? <SimpleTradingView asset={asset} quote={quote.data} facts={setupFacts} candles={structure.recentCandles} loading={quote.loading || structure.loading} error={quote.error ?? structure.error} onOpenPro={() => { setSimpleMode(false); window.localStorage.setItem("ai-trading-simple-mode", "false"); }}/> : <>
         <Sidebar active={sidebarView} onChange={setSidebarView} />
         {sidebarView === "Watchlist" && (
           <Watchlist
@@ -274,7 +283,7 @@ export default function Home() {
         ) : (
           <>
             <PanelErrorBoundary name="Chart">
-              <section className="flex min-w-0 flex-1 flex-col border-l border-[#20242d]">
+              <section className="flex min-h-[560px] min-w-0 shrink-0 flex-col border-l border-[#20242d] lg:min-h-0 lg:flex-1 lg:shrink">
                 <TradingChart
                   key={`${asset.symbol}-${workspace.timeframe}`}
                   asset={asset}
@@ -313,6 +322,7 @@ export default function Home() {
                   }))
                 }
                 recentCandles={structure.recentCandles}
+                patternAnalysis={structure.patterns}
                 debug={{
                   source: structure.source,
                   provider: structure.provider,
@@ -325,6 +335,8 @@ export default function Home() {
             </PanelErrorBoundary>
           </>
         )}
+        <button onClick={() => { setSimpleMode(true); window.localStorage.setItem("ai-trading-simple-mode", "true"); }} className="fixed bottom-14 right-2 z-40 border border-blue-500/30 bg-[#101722] px-3 py-2 text-[9px] font-bold text-blue-300 lg:bottom-3">SIMPLE MODE</button>
+        </>}
       </div>
     </main>
   );

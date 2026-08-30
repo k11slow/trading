@@ -10,11 +10,22 @@
 }
 
 * { box-sizing: border-box; }
-html { color-scheme: dark; }
-body { margin: 0; background: var(--background); color: var(--foreground); font-family: Arial, Helvetica, sans-serif; }
+html { max-width: 100%; color-scheme: dark; overflow-x: hidden; }
+body { margin: 0; max-width: 100%; overflow-x: hidden; background: var(--background); color: var(--foreground); font-family: Arial, Helvetica, sans-serif; }
 button { cursor: pointer; }
 button:focus-visible { outline: 1px solid #3b82f6; outline-offset: -1px; }
 .thin-scrollbar { scrollbar-width: thin; scrollbar-color: #2c3340 transparent; }
+
+@media (max-width: 639px) {
+  input, select, textarea { font-size: 16px; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  .fixed.right-5.top-20.w-80 { left: .75rem; right: .75rem; width: auto; }
+  main.min-h-dvh > header { height: 3.5rem; gap: .375rem; padding-inline: .75rem; }
+  main.min-h-dvh > header b { font-size: 11px; }
+  main.min-h-dvh > header > div > span { width: 1.75rem; height: 1.75rem; }
+  section.overflow-y-auto { overflow-x: auto; }
+  .grid-cols-\[1fr_\.8fr_\.8fr_1fr_1\.2fr\] { min-width: 600px; }
+}
 
 /*
  * Keep the terminal dense without making supporting information illegible.

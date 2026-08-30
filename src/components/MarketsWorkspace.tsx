@@ -164,7 +164,7 @@ export function MarketsWorkspace({
     ),
   });
   return (
-    <section className="min-h-0 flex-1 overflow-y-auto bg-[#090c11] p-4 pb-16 thin-scrollbar">
+    <section className="min-h-0 flex-1 overflow-y-auto bg-[#090c11] p-3 pb-16 sm:p-4 thin-scrollbar">
       <div className="mx-auto max-w-[1400px]">
         <div className="flex items-center">
           <div>
@@ -447,7 +447,7 @@ function InstrumentRow({
   const asset = toAsset(item);
   const chartable = asset.dataStatus !== "UNAVAILABLE";
   return (
-    <div className="grid h-[39px] grid-cols-[28px_1fr_1.6fr_.8fr_.8fr_.8fr] items-center border-b border-[#181d24] px-2 text-[8px] hover:bg-[#121821]">
+    <div className="grid h-[39px] min-w-[640px] grid-cols-[28px_1fr_1.6fr_.8fr_.8fr_.8fr] items-center border-b border-[#181d24] px-2 text-[8px] hover:bg-[#121821]">
       <button
         onClick={() => onFavorite(asset)}
         className={favorite ? "text-amber-400" : "text-[#46505d]"}
@@ -478,7 +478,7 @@ function FuturesInstrumentRow({ item, favorite, onSelect, onFavorite }: { item: 
     queryKey: ["futures-row-quote", item.symbol], staleTime: 30_000,
     queryFn: ({ signal }) => fetchJson<{ ok: boolean; data: { price: number; changePercent: number } }>(`/api/market/quote?symbol=${encodeURIComponent(item.symbol)}&category=Futures`, signal),
   });
-  return <div className="grid h-12 grid-cols-[28px_1.4fr_.65fr_.7fr_.75fr_.7fr_.65fr_.7fr] items-center border-b border-[#181d24] px-2 text-[8px] hover:bg-[#121821]">
+  return <div className="grid h-12 min-w-[760px] grid-cols-[28px_1.4fr_.65fr_.7fr_.75fr_.7fr_.65fr_.7fr] items-center border-b border-[#181d24] px-2 text-[8px] hover:bg-[#121821]">
     <button onClick={() => onFavorite(asset)} className={favorite ? "text-amber-400" : "text-[#46505d]"}><Star size={11} fill={favorite ? "currentColor" : "none"} /></button>
     <button onClick={() => onSelect(asset)} className="min-w-0 text-left"><b className="block truncate text-white">{item.displayName}</b><span className="text-[#687180]">{item.symbol} • {item.futuresCategory}</span></button>
     <span>{item.exchange}</span><span>{item.contractMonth ?? item.expiry ?? "—"}</span>
@@ -507,7 +507,7 @@ function TrendingSection({
   risky?: boolean;
 }) {
   return (
-    <section className="mt-5 border border-[#20242d]">
+    <section className="mt-5 overflow-x-auto border border-[#20242d] thin-scrollbar">
       <div className="flex h-9 items-center border-b border-[#20242d] px-3">
         <b className="text-[9px] tracking-widest">{title}</b>
         {risky && (
@@ -521,7 +521,7 @@ function TrendingSection({
         </span>
       </div>
       {risky && !loading && rows.length > 0 && (
-        <div className="grid grid-cols-[24px_24px_1.3fr_repeat(6,.55fr)_.7fr_.7fr_.7fr_.65fr_.7fr_.7fr_.8fr] gap-1 border-b border-[#252b35] px-2 py-1 text-[7px] text-[#596170]">
+        <div className="grid min-w-[1180px] grid-cols-[24px_24px_1.3fr_repeat(6,.55fr)_.7fr_.7fr_.7fr_.65fr_.7fr_.7fr_.8fr] gap-1 border-b border-[#252b35] px-2 py-1 text-[7px] text-[#596170]">
           <span /><span>#</span><span>TOKEN / CHAIN</span><span>PRICE</span><span>5M</span><span>1H</span><span>6H</span><span>24H</span><span>VOLUME</span><span>LIQUIDITY</span><span>FDV/MC</span><span>AGE</span><span>BUYS/SELLS</span><span>TREND</span><span>AI</span><span>SOURCE</span>
         </div>
       )}
@@ -558,7 +558,7 @@ function TrendingSection({
           return (
             <div
               key={row.id ?? `${row.provider}:${row.symbol}`}
-              className={`grid items-center gap-1 border-b border-[#181d24] px-2 py-2 font-mono text-[8px] ${risky ? "grid-cols-[24px_24px_1.3fr_repeat(6,.55fr)_.7fr_.7fr_.7fr_.65fr_.7fr_.7fr_.8fr]" : "grid-cols-[28px_28px_1fr_.8fr_.8fr_.8fr_.8fr_.7fr_.7fr_.7fr]"}`}
+              className={`grid items-center gap-1 border-b border-[#181d24] px-2 py-2 font-mono text-[8px] ${risky ? "min-w-[1180px] grid-cols-[24px_24px_1.3fr_repeat(6,.55fr)_.7fr_.7fr_.7fr_.65fr_.7fr_.7fr_.8fr]" : "min-w-[720px] grid-cols-[28px_28px_1fr_.8fr_.8fr_.8fr_.8fr_.7fr_.7fr_.7fr]"}`}
             >
               <button
                 onClick={() => onFavorite(asset)}

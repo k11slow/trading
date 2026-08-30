@@ -381,7 +381,7 @@ export function TradingChart({
   return (
     <div className="relative min-h-[310px] flex-1 bg-[#090c11]">
       <div className="pointer-events-none absolute left-4 top-3 z-10">
-        <div className="flex items-center gap-2">
+        <div className="flex max-w-[calc(100vw-5rem)] flex-wrap items-center gap-1.5 sm:gap-2">
           <span className="text-xs font-semibold text-[#d9dee7]">
             {asset.symbol}
           </span>
@@ -409,7 +409,7 @@ export function TradingChart({
           )}
         </div>
         {displayed && (
-          <div className="mt-1 flex gap-2 font-mono text-[9px]">
+          <div className="mt-1 hidden gap-2 font-mono text-[9px] sm:flex">
             <span className="text-[#7b8492]">
               O {formatPrice(asset, displayed.open)}
             </span>
@@ -424,7 +424,7 @@ export function TradingChart({
             </span>
           </div>
         )}
-        <div className="mt-2 flex gap-3 text-[9px]">
+        <div className="mt-2 hidden gap-3 text-[9px] md:flex">
           {indicators.has("ema20") && (
             <span className="text-blue-400">EMA 20</span>
           )}
@@ -459,7 +459,7 @@ export function TradingChart({
       {selectedPattern && indicators.has("patterns") && (
         <button
           onClick={() => setSelectedPattern(null)}
-          className="absolute bottom-12 left-4 z-30 w-64 border border-[#303744] bg-[#10151c]/95 p-3 text-left shadow-xl"
+          className="absolute bottom-12 left-3 z-30 w-[min(16rem,calc(100vw-1.5rem))] border border-[#303744] bg-[#10151c]/95 p-3 text-left shadow-xl sm:left-4"
         >
           <div className="flex items-center justify-between">
             <span

@@ -21,6 +21,26 @@ describe("candlestick shape detection", () => {
   it("detects an inside bar", () => { const patterns = detect([bar(20, 10, 11, 9, 10.4), bar(21, 10.2, 10.7, 9.4, 10.3)]); expect(namesAt(patterns, 21)).toContain("Inside Bar"); });
   it("detects a long upper wick", () => { const patterns = detect([bar(21, 10, 11.7, 9.95, 10.3)]); expect(namesAt(patterns, 21)).toContain("Long Upper Wick"); });
   it("detects a long lower wick", () => { const patterns = detect([bar(21, 10.3, 10.35, 8.6, 10)]); expect(namesAt(patterns, 21)).toContain("Long Lower Wick"); });
+  it("detects piercing line and dark cloud cover reversals", () => {
+    expect(namesAt(detect([bar(20, 11, 11.1, 9.8, 10), bar(21, 9.95, 10.7, 9.8, 10.6)]), 21)).toContain("Piercing Line");
+    expect(namesAt(detect([bar(20, 10, 11.1, 9.9, 11), bar(21, 11.05, 11.2, 10.3, 10.4)]), 21)).toContain("Dark Cloud Cover");
+  });
+  it("detects harami and tweezer reversals", () => {
+    expect(namesAt(detect([bar(20, 11, 11.1, 9.8, 10), bar(21, 10.2, 10.7, 10.1, 10.6)]), 21)).toContain("Bullish Harami");
+    expect(namesAt(detect([bar(20, 10.7, 11.05, 9.8, 10), bar(21, 10, 10.8, 9.81, 10.7)]), 21)).toContain("Tweezer Bottom");
+  });
+  it("detects three inside confirmation", () => {
+    const pattern = detect([bar(19, 11, 11.1, 9.8, 10), bar(20, 10.2, 10.7, 10.1, 10.6), bar(21, 10.5, 11.3, 10.4, 11.2)]);
+    expect(namesAt(pattern, 21)).toContain("Three Inside Up");
+  });
+  it("detects specialized doji and configurable pin-bar geometry", () => {
+    expect(namesAt(detect([bar(21, 10.3, 10.34, 8.7, 10.31)]), 21)).toContain("Dragonfly Doji");
+    expect(namesAt(detect([bar(21, 10, 10.28, 8.5, 10.22)]), 21)).toContain("Bullish Pin Bar");
+  });
+  it("detects a liquidity sweep that reclaims recent lows", () => {
+    const lead = [bar(16, 10, 10.6, 9.5, 10.1), bar(17, 10.1, 10.7, 9.55, 10.2), bar(18, 10.2, 10.8, 9.6, 10.3), bar(19, 10.3, 10.7, 9.52, 10.2), bar(20, 10.2, 10.6, 9.51, 10.1)];
+    expect(namesAt(detect([...lead, bar(21, 10.05, 10.5, 9.1, 9.8)]), 21)).toContain("Bullish Liquidity Sweep");
+  });
 });
 
 describe("pattern state and contextual scoring", () => {
@@ -30,4 +50,12 @@ describe("pattern state and contextual scoring", () => {
   it("scores a shooting star higher at resistance", () => { const star = [bar(21, 10.1, 11.6, 10.05, 10.35)]; const near = detect(star, structure("bullish", [zone("resistance", 11.4, 11.7)]), "sideways").find((pattern) => pattern.name === "Shooting Star")!; const middle = detect(star, structure("bullish"), "sideways").find((pattern) => pattern.name === "Shooting Star")!; expect(near.confidence).toBeGreaterThan(middle.confidence); });
   it("filters an extremely tiny noisy candle", () => { const tiny = bar(21, 10, 10.006, 9.994, 10.0002); const patterns = detect([tiny]); expect(patterns.filter((pattern) => pattern.timestamp === 21)).toHaveLength(0); });
   it("reduces a bullish pattern against the 4H trend", () => { const aligned = detect(engulfing, structure("bullish"), "bullish").find((pattern) => pattern.name === "Bullish Engulfing")!; const against = detect(engulfing, structure("bullish"), "bearish").find((pattern) => pattern.name === "Bullish Engulfing")!; expect(against.confidence).toBeLessThan(aligned.confidence); expect(against.againstMajorTrend).toBe(true); });
+  it("adds ATR, volume, session, cluster, and closed-candle reliability facts", () => {
+    const pattern = detect(engulfing, structure("bullish"), "bullish").find((item) => item.name === "Bullish Engulfing")!;
+    expect(pattern.reliability).toMatchObject({ closedCandle: true, trendAligned: true });
+    expect(pattern.reliability?.atrRatio).toBeGreaterThan(0);
+    expect(pattern.reliability?.volumeRatio).toBeGreaterThan(0);
+    expect(pattern.reliability?.session).toBeTruthy();
+    expect(pattern.reliability?.cluster.length).toBeGreaterThan(0);
+  });
 });

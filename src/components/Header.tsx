@@ -108,8 +108,8 @@ export function Header({
   const changePercent = quote?.changePercent ?? asset.change;
   const positive = changePercent >= 0;
   return (
-    <header className="relative flex h-14 shrink-0 items-center border-b border-[#20242d] bg-[#0c0f14] px-3">
-      <div className="flex w-[262px] shrink-0 items-center gap-2.5">
+    <header className="relative flex h-[92px] shrink-0 flex-wrap items-center gap-x-2 border-b border-[#20242d] bg-[#0c0f14] px-2 sm:h-14 sm:flex-nowrap sm:px-3">
+      <div className="hidden shrink-0 items-center gap-2.5 lg:flex lg:w-[220px] xl:w-[262px]">
         <span className="grid size-7 place-items-center bg-blue-600 text-[11px] font-black text-white">
           AI
         </span>
@@ -125,19 +125,19 @@ export function Header({
             setSymbolMenu((value) => !value);
             setIndicatorMenu(false);
           }}
-          className={`flex h-8 items-center gap-2 border bg-[#12161d] px-3 text-xs font-semibold text-white hover:bg-[#171c24] ${symbolMenu ? "border-blue-500" : "border-[#2a303b]"}`}
+          className={`flex h-9 max-w-[42vw] items-center gap-2 border bg-[#12161d] px-2 text-xs font-semibold text-white hover:bg-[#171c24] sm:h-8 sm:max-w-none sm:px-3 ${symbolMenu ? "border-blue-500" : "border-[#2a303b]"}`}
         >
           <span className="grid size-4 place-items-center rounded-full bg-blue-600 text-[8px]">
             {asset.symbol.slice(0, 1)}
           </span>
-          {asset.symbol}
+          <span className="truncate">{asset.symbol}</span>
           <ChevronDown
             size={13}
             className={`text-[#717989] transition-transform ${symbolMenu ? "rotate-180" : ""}`}
           />
         </button>
         {symbolMenu && (
-          <div className="absolute left-0 top-10 z-[70] w-80 border border-[#303744] bg-[#10151c] shadow-2xl">
+          <div className="absolute left-0 top-10 z-[70] w-[min(20rem,calc(100vw-1rem))] border border-[#303744] bg-[#10151c] shadow-2xl">
             <div className="relative border-b border-[#252b35] p-2">
               <Search
                 size={13}
@@ -217,7 +217,7 @@ export function Header({
             : "Loading quote"}
         </div>
       </div>
-      <div className="mx-auto flex items-center gap-0.5 bg-[#0a0d12] p-0.5">
+      <div className="order-3 mx-auto flex w-full items-center justify-center gap-0.5 bg-[#0a0d12] p-0.5 sm:order-none sm:w-auto">
         {frames.map((frame) => (
           <button
             key={frame}
@@ -251,8 +251,16 @@ export function Header({
           <Settings size={16} />
         </button>
       </div>
+      <div className="ml-auto flex items-center gap-1 xl:hidden">
+        <Link href="/recommendations" aria-label="Recommended buys" className="grid size-9 place-items-center border border-emerald-500/35 text-emerald-400">
+          <Sparkles size={15} />
+        </Link>
+        <button aria-label="Buy alert settings" onClick={onOpenBuyAlerts} className="grid size-9 place-items-center border border-[#252a34] text-[#aeb5c1]">
+          <Bell size={15} />
+        </button>
+      </div>
       {indicatorMenu && (
-        <div className="absolute right-20 top-12 z-50 w-56 border border-[#2a303b] bg-[#11151c] p-1 shadow-2xl">
+        <div className="absolute right-2 top-12 z-50 w-56 border border-[#2a303b] bg-[#11151c] p-1 shadow-2xl sm:right-20">
           <div className="px-2 py-2 text-[9px] font-bold tracking-[.15em] text-[#5d6675]">
             CHART INDICATORS
           </div>

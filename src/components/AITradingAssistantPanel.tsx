@@ -17,7 +17,7 @@ import {
   type RuleBasedSetup,
   type TradingAssistantResult,
 } from "@/lib/ai";
-import type { PatternSensitivity } from "@/lib/analysis";
+import type { MultiTimeframePatternAnalysis, PatternSensitivity } from "@/lib/analysis";
 import { formatPrice, type MarketAsset } from "@/lib/market-data";
 import type { Candle } from "@/lib/market-data/types";
 import { askTradingAssistant } from "@/hooks/use-ai-assistant";
@@ -34,6 +34,7 @@ export function AITradingAssistantPanel({
   patternSensitivity,
   onPatternSensitivityChange,
   recentCandles,
+  patternAnalysis,
   debug,
 }: {
   asset: MarketAsset;
@@ -47,6 +48,7 @@ export function AITradingAssistantPanel({
   patternSensitivity: PatternSensitivity;
   onPatternSensitivityChange: (value: PatternSensitivity) => void;
   recentCandles?: Candle[];
+  patternAnalysis?: MultiTimeframePatternAnalysis | null;
   debug?: {
     source: string;
     provider: string;
@@ -62,7 +64,7 @@ export function AITradingAssistantPanel({
   const [chatLoading, setChatLoading] = useState(false);
   if (!facts)
     return (
-      <aside className="hidden w-[380px] shrink-0 border-l border-[#20242d] bg-[#0c0f14] xl:block">
+      <aside className="w-full shrink-0 border-t border-[#20242d] bg-[#0c0f14] lg:w-[320px] lg:border-l lg:border-t-0 xl:w-[380px]">
         <div className="p-4">
           <div className="flex items-center gap-2 text-[9px] font-bold tracking-widest text-[#8993a1]">
             <Bot size={13} className="text-blue-400" />
@@ -87,6 +89,7 @@ export function AITradingAssistantPanel({
   const coach = buildTradingCoach(facts, mode, recentCandles);
   const support = facts.setup1H.support;
   const resistance = facts.setup1H.resistance;
+  const reliablePattern = patternAnalysis?.byTimeframe["15m"]?.mostRelevant ?? null;
   const viewTone =
     facts.preference === "BUY"
       ? "text-[#16c784]"
@@ -129,7 +132,7 @@ export function AITradingAssistantPanel({
     }
   };
   return (
-    <aside className="hidden w-[380px] shrink-0 overflow-y-auto border-l border-[#20242d] bg-[#0c0f14] xl:block thin-scrollbar">
+    <aside className="w-full shrink-0 overflow-y-visible border-t border-[#20242d] bg-[#0c0f14] lg:w-[320px] lg:overflow-y-auto lg:border-l lg:border-t-0 xl:w-[380px] thin-scrollbar">
       <header className="flex h-10 items-center border-b border-[#20242d] px-4">
         <Bot size={13} className="mr-2 text-blue-400" />
         <b className="text-[9px] tracking-[.14em]">AI TRADING COACH</b>
@@ -239,6 +242,22 @@ export function AITradingAssistantPanel({
               </p>
             </div>
           </details>
+        )}
+        {reliablePattern?.reliability && (
+          <CoachBox title="PATTERN RELIABILITY" tone="blue">
+            <div className="grid grid-cols-2 gap-2 text-[8px]">
+              <ReliabilityFact label="Pattern" value={reliablePattern.name} />
+              <ReliabilityFact label="Closed candle" value={reliablePattern.reliability.closedCandle ? "Confirmed" : "Forming"} />
+              <ReliabilityFact label="Volume" value={`${reliablePattern.reliability.volumeRatio.toFixed(2)}× average`} />
+              <ReliabilityFact label="Range / ATR" value={`${reliablePattern.reliability.atrRatio.toFixed(2)}×`} />
+              <ReliabilityFact label="Session" value={reliablePattern.reliability.session} />
+              <ReliabilityFact label="Trend" value={reliablePattern.reliability.trendAligned ? "Aligned" : "Counter-trend"} />
+              <ReliabilityFact label="Location" value={reliablePattern.reliability.locationConfirmed ? "At key zone" : "Mid-range"} />
+              <ReliabilityFact label="Confluence" value={`${reliablePattern.reliability.cluster.length + 1} signal${reliablePattern.reliability.cluster.length ? "s" : ""}`} />
+              <ReliabilityFact label="Historical" value={reliablePattern.reliability.historicalWinRate === null ? "Collecting samples" : `${reliablePattern.reliability.historicalWinRate}% · ${reliablePattern.reliability.historicalSamples} samples`} />
+              <ReliabilityFact label="Divergence" value={reliablePattern.reliability.divergence ?? "None"} />
+            </div>
+          </CoachBox>
         )}
         <CoachBox title="KEY LEVELS">
           <div className="text-[9px] text-[#8993a1]">
@@ -480,6 +499,9 @@ function CoachBox({
       {children}
     </section>
   );
+}
+function ReliabilityFact({ label, value }: { label: string; value: string }) {
+  return <div className="border border-blue-500/10 bg-[#0a0f16] p-2"><span className="block text-[7px] uppercase tracking-wider text-[#687180]">{label}</span><b className="mt-1 block text-[8px] text-[#c5d4e8]">{value}</b></div>;
 }
 function Case({
   label,

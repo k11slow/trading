@@ -8,6 +8,9 @@ import { detectMarubozu } from "./marubozu";
 import { detectMultiCandle } from "./multi-candle";
 import { detectStarPatterns } from "./stars";
 import { detectWickRejection } from "./wick-rejection";
+import { detectReversalPatterns } from "./reversals";
+import { detectMarketSignals } from "./market-signals";
+import { enrichPatternReliability } from "./reliability";
 import { candleMetrics, recentAverageRange } from "./metrics";
 import { explanations } from "./explanations";
 import { scorePatternContext } from "./score";
@@ -16,7 +19,7 @@ import type { PatternDetection, PatternDetectionOptions, PatternDetectorContext,
 const sensitivitySettings = { low: { minimumScore: 66, minimumRange: .55 }, medium: { minimumScore: 52, minimumRange: .28 }, high: { minimumScore: 42, minimumRange: .12 } } as const;
 
 function rawPatterns(context: PatternDetectorContext) {
-  return [...detectEngulfing(context), ...detectHammerFamily(context), ...detectIndecision(context), ...detectStarPatterns(context), ...detectMarubozu(context), ...detectInsideOutside(context), ...detectMultiCandle(context), ...detectWickRejection(context)].sort((a, b) => b.shapeScore - a.shapeScore);
+  return [...detectEngulfing(context), ...detectHammerFamily(context), ...detectIndecision(context), ...detectStarPatterns(context), ...detectMarubozu(context), ...detectInsideOutside(context), ...detectMultiCandle(context), ...detectWickRejection(context), ...detectReversalPatterns(context), ...detectMarketSignals(context)].sort((a, b) => b.shapeScore - a.shapeScore);
 }
 
 function scoreRawPattern(raw: RawPattern, candles: Candle[], index: number, timeframe: Timeframe, structure: TimeframeStructureAnalysis, options: PatternDetectionOptions, status: PatternStatus): PatternDetection | null {
@@ -30,9 +33,12 @@ function scoreRawPattern(raw: RawPattern, candles: Candle[], index: number, time
 
 export function detectCandlestickPatterns(candles: Candle[], timeframe: Timeframe, structure: TimeframeStructureAnalysis, options: PatternDetectionOptions = {}): PatternDetection[] {
   if (candles.length < 6) return [];
-  const detections: PatternDetection[] = []; const confirmedEnd = candles.length - 2; const start = Math.max(4, confirmedEnd - 120);
+  const detections: PatternDetection[] = []; const confirmedEnd = candles.length - 2; const start = Math.max(4, confirmedEnd - (options.lookback ?? 120));
   const evaluate = (index: number, status: PatternStatus) => { const context: PatternDetectorContext = { candles, index, metrics: candleMetrics(candles[index]), structure, options }; for (const raw of rawPatterns(context)) { const scored = scoreRawPattern(raw, candles, index, timeframe, structure, options, status); if (scored) detections.push(scored); } };
   for (let index = start; index <= confirmedEnd; index++) evaluate(index, "confirmed");
   if (options.includeForming !== false) evaluate(candles.length - 1, "forming");
-  return detections.sort((a, b) => b.timestamp - a.timestamp || b.confidence - a.confidence);
+  const statuses = new Map<number, PatternStatus>();
+  for (let index = start; index <= confirmedEnd; index++) statuses.set(index, "confirmed");
+  if (options.includeForming !== false) statuses.set(candles.length - 1, "forming");
+  return enrichPatternReliability(detections, candles, statuses).sort((a, b) => b.timestamp - a.timestamp || b.confidence - a.confidence);
 }
